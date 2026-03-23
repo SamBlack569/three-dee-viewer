@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 
@@ -56,4 +57,8 @@ function animate() {
 }
 animate();
 
+const cameraControls = new OrbitControls(camera, renderer.domElement);
+
 renderer.render(scene, camera);
+
+requestAnimationFrame(animate);
