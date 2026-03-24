@@ -39,8 +39,10 @@ export function mountViewer(container: HTMLElement): () => void {
     const cameraControls = new OrbitControls(camera, renderer.domElement);
     setupFragmentsManager(components, scene, camera, cameraControls);
 
-    const axes = new THREE.AxesHelper();
-    const grid = new THREE.GridHelper();
+    const axes = new THREE.AxesHelper(5);
+    const gridSize = 120;
+    const gridDivisions = 120;
+    const grid = new THREE.GridHelper(gridSize, gridDivisions);
     grid.material.transparent = true;
     grid.material.opacity = 0.5;
     grid.material.color = new THREE.Color(0x444444);
@@ -49,6 +51,11 @@ export function mountViewer(container: HTMLElement): () => void {
     const gui = new GUI();
     let loadedModel: THREE.Object3D | null = null;
     const modelState = { visible: false };
+
+    const helpersFolder = gui.addFolder("Helpers");
+    helpersFolder.add(axes, "visible").name("Axes");
+    helpersFolder.add(grid, "visible").name("Grid");
+
     const cubeControls = gui.addFolder("Gold Cube");
     cubeControls.add(cube.position, "x", -10, 10, 0.01);
     cubeControls.add(cube.position, "y", -10, 10, 0.01);
