@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { GUI } from 'lil-gui';
 import { createGoldCube } from './objects/cube';
 import { loadFA18FModel } from './objects/fa18f';
 
