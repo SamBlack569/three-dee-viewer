@@ -22,6 +22,10 @@ The main purpose is to learn and deepen my understanding of web viewers, then ap
 - [Vite](https://vitejs.dev/)
 - TypeScript
 
+## Asset Source
+
+- FA-18F model source: [CGTrader - FA-18F Super Hornet](https://www.cgtrader.com/items/2216599/download-page)
+
 ## Run Locally
 
 ```bash
