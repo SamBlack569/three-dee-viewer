@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 
 
@@ -72,6 +74,8 @@ grid.material.color = new THREE.Color(0x444444);
 scene.add(axes, grid);
 
 const gui = new GUI();
+let loadedModel: THREE.Object3D | null = null;
+const modelState = { visible: false };
 
 const cubeControls = gui.addFolder("Gold Cube");
 
@@ -80,4 +84,66 @@ cubeControls.add(cube.position, "y", -10, 10, 0.01);
 cubeControls.add(cube.position, "z", -10, 10, 0.01);
 cubeControls.add(cube, "visible");
 
+const modelControls = gui.addFolder("FA-18F");
+modelControls.add(modelState, "visible").name("visible").onChange((value: boolean) => {
+    if (!loadedModel) return;
+    loadedModel.visible = value;
+});
+
+function frameObject(object: THREE.Object3D): void {
+    const box = new THREE.Box3().setFromObject(object);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxSize = Math.max(size.x, size.y, size.z);
+    const fitHeightDistance = maxSize / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)));
+    const fitWidthDistance = fitHeightDistance / camera.aspect;
+    const distance = 1.2 * Math.max(fitHeightDistance, fitWidthDistance);
+
+    camera.position.set(center.x, center.y + maxSize * 0.2, center.z + distance);
+    camera.near = Math.max(0.01, distance / 100);
+    camera.far = distance * 100;
+    camera.updateProjectionMatrix();
+    cameraControls.target.copy(center);
+    cameraControls.update();
+}
+
 animate();
+
+const objLoader = new OBJLoader();
+const mtlLoader = new MTLLoader();
+
+mtlLoader.setPath('/assets/FA-18F/');
+mtlLoader.setResourcePath('/assets/FA-18F/textures/');
+mtlLoader.load('FA-18F.mtl', (materials) => {
+    materials.preload();
+    objLoader.setMaterials(materials);
+    objLoader.setPath('/assets/FA-18F/');
+    objLoader.load('FA-18F.obj', (model) => {
+        model.scale.setScalar(0.2);
+
+        model.traverse((child) => {
+            if (!(child instanceof THREE.Mesh)) return;
+            const material = child.material;
+            if (!material || Array.isArray(material)) return;
+            if ('map' in material && material.map) {
+                material.map.colorSpace = THREE.SRGBColorSpace;
+            }
+            if ('opacity' in material) {
+                material.opacity = 1;
+            }
+            if ('transparent' in material) {
+                material.transparent = false;
+            }
+            material.needsUpdate = true;
+        });
+
+        model.visible = modelState.visible;
+        loadedModel = model;
+        scene.add(model);
+        frameObject(model);
+    }, undefined, (error) => {
+        console.error('Failed to load FA-18F.obj', error);
+    });
+}, undefined, (error) => {
+    console.error('Failed to load FA-18F.mtl', error);
+});
