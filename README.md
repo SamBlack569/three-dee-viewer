@@ -9,10 +9,10 @@ The main purpose is to learn and deepen my understanding of web viewers, then ap
 - Build and understand a basic Three.js scene
 - Experiment with camera, lighting, materials, and rendering setup
 - Create a solid foundation for a production-oriented viewer
+- IFC file loading is already implemented using the That Open Engine (`@thatopen/components`)
 
 ## Next Goals
 
-- Add support for **IFC** files
 - Add support for **Frags** (That Open Fragment)
 - Explore workflows for BIM visualization in the browser
 
