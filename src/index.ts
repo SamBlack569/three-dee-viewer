@@ -2,10 +2,17 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GUI } from 'lil-gui';
+import * as OBC from '@thatopen/components';
 import { createGoldCube } from './objects/cube';
 import { loadFA18FModel } from './objects/fa18f';
+import { getViewerComponents } from './thatopen/components';
+import { setupIfcLoader } from './loaders/setupIfcLoader';
+import { setupFragmentsManager } from './loaders/setupFragmentsManager';
 
 export function mountViewer(container: HTMLElement): () => void {
+    const components: OBC.Components = getViewerComponents();
+    setupIfcLoader(components);
+
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -30,6 +37,7 @@ export function mountViewer(container: HTMLElement): () => void {
     scene.add(cube, directionalLight, fillLight, ambientLight, hemiLight);
 
     const cameraControls = new OrbitControls(camera, renderer.domElement);
+    setupFragmentsManager(components, scene, camera, cameraControls);
 
     const axes = new THREE.AxesHelper();
     const grid = new THREE.GridHelper();
