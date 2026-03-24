@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { createGoldCube } from './objects/cube';
+import { loadFA18FModel } from './objects/fa18f';
 
 
 const scene = new THREE.Scene();
@@ -28,15 +28,7 @@ document.body.appendChild(renderer.domElement);
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
-
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshStandardMaterial({
-    color: 0xd4af37,
-    metalness: 1,
-    roughness: 0.28,
-    envMapIntensity: 0.9
-});
-const cube = new THREE.Mesh(geometry, material);
+const cube = createGoldCube();
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1.25);
 directionalLight.position.set(2, 3, 4);
@@ -108,42 +100,13 @@ function frameObject(object: THREE.Object3D): void {
 }
 
 animate();
-
-const objLoader = new OBJLoader();
-const mtlLoader = new MTLLoader();
-
-mtlLoader.setPath('/assets/FA-18F/');
-mtlLoader.setResourcePath('/assets/FA-18F/textures/');
-mtlLoader.load('FA-18F.mtl', (materials) => {
-    materials.preload();
-    objLoader.setMaterials(materials);
-    objLoader.setPath('/assets/FA-18F/');
-    objLoader.load('FA-18F.obj', (model) => {
-        model.scale.setScalar(0.2);
-
-        model.traverse((child) => {
-            if (!(child instanceof THREE.Mesh)) return;
-            const material = child.material;
-            if (!material || Array.isArray(material)) return;
-            if ('map' in material && material.map) {
-                material.map.colorSpace = THREE.SRGBColorSpace;
-            }
-            if ('opacity' in material) {
-                material.opacity = 1;
-            }
-            if ('transparent' in material) {
-                material.transparent = false;
-            }
-            material.needsUpdate = true;
-        });
-
-        model.visible = modelState.visible;
+loadFA18FModel(scene, {
+    visible: modelState.visible,
+    onLoaded: (model) => {
         loadedModel = model;
-        scene.add(model);
         frameObject(model);
-    }, undefined, (error) => {
-        console.error('Failed to load FA-18F.obj', error);
-    });
-}, undefined, (error) => {
-    console.error('Failed to load FA-18F.mtl', error);
+    },
+    onError: (error) => {
+        console.error('Failed to load FA-18F model', error);
+    }
 });
