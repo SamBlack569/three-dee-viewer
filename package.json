@@ -5,6 +5,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@thatopen/ui": "^3.3.4",
     "lil-gui": "^0.21.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -1,5 +1,9 @@
 import React, { useEffect, useRef } from 'react';
+import * as BUI from '@thatopen/ui';
 import { mountViewer } from './index';
+import LoadIfcButton from './components/LoadIfcButton';
+
+BUI.Manager.init();
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -27,19 +31,7 @@ export default function App() {
         <p style={{ margin: '8px 0 16px', opacity: 0.8 }}>
           Left panel for controls and model actions.
         </p>
-        <button
-          type="button"
-          style={{
-            padding: '8px 12px',
-            borderRadius: 8,
-            border: '1px solid #3a3a3a',
-            background: '#1f1f1f',
-            color: '#fff',
-            cursor: 'pointer'
-          }}
-        >
-          Example action
-        </button>
+        <LoadIfcButton />
       </aside>
 
       <main style={{ flex: 1, minWidth: 0 }}>
