@@ -5,6 +5,7 @@ import { mountCubeViewer } from './viewers/cubeViewer';
 import { mountIfcViewer } from './viewers/ifcViewer';
 import LoadIfcButton from './components/LoadIfcButton';
 import IfcDataPanel from './components/IfcDataPanel';
+import IfcModelsPanel from './components/IfcModelsPanel';
 
 BUI.Manager.init();
 
@@ -84,6 +85,7 @@ export default function App() {
         {activeViewer === 'ifc' && ifcComponents && (
           <>
             <LoadIfcButton components={ifcComponents} />
+            <IfcModelsPanel components={ifcComponents} />
             <IfcDataPanel components={ifcComponents} />
           </>
         )}
