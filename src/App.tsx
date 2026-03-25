@@ -1,18 +1,36 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as BUI from '@thatopen/ui';
-import { mountViewer } from './index';
+import * as OBC from '@thatopen/components';
+import { mountCubeViewer } from './viewers/cubeViewer';
+import { mountIfcViewer } from './viewers/ifcViewer';
 import LoadIfcButton from './components/LoadIfcButton';
 
 BUI.Manager.init();
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [activeViewer, setActiveViewer] = useState<'cube' | 'ifc'>('cube');
+  const ifcHandleRef = useRef<ReturnType<typeof mountIfcViewer> | null>(null);
+  const [ifcComponents, setIfcComponents] = useState<OBC.Components | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const cleanup = mountViewer(containerRef.current);
-    return cleanup;
-  }, []);
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    if (activeViewer === 'cube') {
+      ifcHandleRef.current?.dispose();
+      ifcHandleRef.current = null;
+      setIfcComponents(null);
+      const cleanup = mountCubeViewer(container);
+      return cleanup;
+    }
+
+    const handle = mountIfcViewer(container);
+    ifcHandleRef.current = handle;
+    setIfcComponents(handle.components);
+    return () => handle.dispose();
+  }, [activeViewer]);
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
@@ -31,7 +49,38 @@ export default function App() {
         <p style={{ margin: '8px 0 16px', opacity: 0.8 }}>
           Left panel for controls and model actions.
         </p>
-        <LoadIfcButton />
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <button
+            onClick={() => setActiveViewer('cube')}
+            style={{
+              flex: 1,
+              padding: '8px 10px',
+              borderRadius: 8,
+              border: '1px solid #2a2a2a',
+              background: activeViewer === 'cube' ? '#2a2a2a' : '#171717',
+              color: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            Cube viewer
+          </button>
+          <button
+            onClick={() => setActiveViewer('ifc')}
+            style={{
+              flex: 1,
+              padding: '8px 10px',
+              borderRadius: 8,
+              border: '1px solid #2a2a2a',
+              background: activeViewer === 'ifc' ? '#2a2a2a' : '#171717',
+              color: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            IFC viewer
+          </button>
+        </div>
+
+        {activeViewer === 'ifc' && ifcComponents && <LoadIfcButton components={ifcComponents} />}
       </aside>
 
       <main style={{ flex: 1, minWidth: 0 }}>

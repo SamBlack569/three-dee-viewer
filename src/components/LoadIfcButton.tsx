@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as BUI from '@thatopen/ui';
 import * as OBC from '@thatopen/components';
-import { setupIfcLoader } from '../loaders/setupIfcLoader';
-import { getViewerComponents } from '../thatopen/components';
 
 // Based on the That Open "Creating BIM Apps" lesson:
 // https://people.thatopen.com/c/creating-bim-apps-0cfd57/sections/342852/lessons/2792030
@@ -41,22 +39,15 @@ export const loadModelBtnTemplate: BUI.StatefullComponent<LoadModelBtnState> = (
   ></bim-button>`;
 };
 
-export default function LoadIfcButton() {
+export default function LoadIfcButton({ components }: { components: OBC.Components }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const componentsRef = useRef<OBC.Components | null>(null);
-
-  if (!componentsRef.current) {
-    const components = getViewerComponents();
-    setupIfcLoader(components);
-    componentsRef.current = components;
-  }
 
   useEffect(() => {
     if (!hostRef.current) return;
 
     const [button] = BUI.Component.create<HTMLElement, LoadModelBtnState>(
       loadModelBtnTemplate,
-      { components: componentsRef.current as OBC.Components }
+      { components }
     );
 
     hostRef.current.innerHTML = '';

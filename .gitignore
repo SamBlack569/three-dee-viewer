@@ -1,5 +1,6 @@
 node_modules/
 dist/
+setup/
 
 # Logs
 npm-debug.log*
