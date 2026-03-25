@@ -4,6 +4,7 @@ import * as OBC from '@thatopen/components';
 import { mountCubeViewer } from './viewers/cubeViewer';
 import { mountIfcViewer } from './viewers/ifcViewer';
 import LoadIfcButton from './components/LoadIfcButton';
+import IfcDataPanel from './components/IfcDataPanel';
 
 BUI.Manager.init();
 
@@ -80,7 +81,12 @@ export default function App() {
           </button>
         </div>
 
-        {activeViewer === 'ifc' && ifcComponents && <LoadIfcButton components={ifcComponents} />}
+        {activeViewer === 'ifc' && ifcComponents && (
+          <>
+            <LoadIfcButton components={ifcComponents} />
+            <IfcDataPanel components={ifcComponents} />
+          </>
+        )}
       </aside>
 
       <main style={{ flex: 1, minWidth: 0 }}>

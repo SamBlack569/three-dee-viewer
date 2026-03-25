@@ -1,6 +1,6 @@
 node_modules/
 dist/
-setup/
+thatopen/
 
 # Logs
 npm-debug.log*

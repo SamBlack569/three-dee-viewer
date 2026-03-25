@@ -1,5 +1,6 @@
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
+import * as THREE from 'three';
 import { getViewerComponents } from '../thatopen/components';
 import { setupIfcLoader } from '../loaders/setupIfcLoader';
 import { setupFragmentsManager } from '../loaders/setupFragmentsManager';
@@ -23,7 +24,7 @@ export function mountIfcViewer(container: HTMLElement): IfcViewerHandle {
 
   world.scene = new OBC.SimpleScene(components);
   world.scene.setup();
-  world.scene.three.background = null;
+  world.scene.three.background = new THREE.Color(0x0b0d12);
 
   const viewport = BUI.Component.create<BUI.Viewport>(() => {
     return BUI.html`<bim-viewport style="width: 100%; height: 100%; display: block;"></bim-viewport>`;
