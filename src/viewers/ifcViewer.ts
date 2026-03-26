@@ -1,6 +1,7 @@
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as THREE from 'three';
+import * as OBF from '@thatopen/components-front';
 import { getViewerComponents } from '../thatopen/components';
 import { setupIfcLoader } from '../loaders/setupIfcLoader';
 import { setupFragmentsManager } from '../loaders/setupFragmentsManager';
@@ -44,6 +45,53 @@ export function mountIfcViewer(container: HTMLElement): IfcViewerHandle {
 
   components.init();
 
+  const highlighter = components.get(OBF.Highlighter);
+  const hider = components.get(OBC.Hider);
+
+  const onShowAll = async () => {
+    await hider.set(true);
+  };
+
+  const onHide = async () => {
+    const selection = highlighter.selection.select;
+    if (OBC.ModelIdMapUtils.isEmpty(selection)) return;
+    await Promise.all([hider.set(false, selection), highlighter.clear('select')]);
+  };
+
+  const onIsolate = async () => {
+    const selection = highlighter.selection.select;
+    if (OBC.ModelIdMapUtils.isEmpty(selection)) return;
+    await hider.isolate(selection);
+  };
+
+  const onFocus = async () => {
+    const selection = highlighter.selection.select;
+    await world.camera.fitToItems(OBC.ModelIdMapUtils.isEmpty(selection) ? undefined : selection);
+  };
+
+  const toolbarWrap = document.createElement('div');
+  toolbarWrap.style.position = 'absolute';
+  toolbarWrap.style.left = '12px';
+  toolbarWrap.style.top = '12px';
+  toolbarWrap.style.zIndex = '5';
+  toolbarWrap.style.pointerEvents = 'auto';
+
+  const toolbar = BUI.Component.create(() => BUI.html`
+    <bim-toolbar>
+      <bim-toolbar-section label="Visibility" icon="mdi:eye">
+        <bim-button icon="mdi:eye" label="Show All" @click=${onShowAll}></bim-button>
+      </bim-toolbar-section>
+      <bim-toolbar-section label="Selection" icon="solar:cursor-bold">
+        <bim-button icon="ri:focus-mode" label="Focus" @click=${onFocus}></bim-button>
+        <bim-button icon="mdi:eye-off" label="Hide" @click=${onHide}></bim-button>
+        <bim-button icon="mdi:selection-ellipse" label="Isolate" @click=${onIsolate}></bim-button>
+      </bim-toolbar-section>
+    </bim-toolbar>
+  `);
+  toolbarWrap.appendChild(toolbar);
+  container.style.position = 'relative';
+  container.appendChild(toolbarWrap);
+
   const onResize = () => {
     world.renderer?.resize();
     world.camera.updateAspect();
@@ -55,6 +103,7 @@ export function mountIfcViewer(container: HTMLElement): IfcViewerHandle {
     dispose: () => {
       window.removeEventListener('resize', onResize);
       world.renderer?.three.dispose();
+      toolbarWrap.remove();
       if (viewport.parentElement === container) container.removeChild(viewport);
     }
   };
