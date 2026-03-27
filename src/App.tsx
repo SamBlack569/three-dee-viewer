@@ -3,33 +3,46 @@ import * as BUI from '@thatopen/ui';
 import * as OBC from '@thatopen/components';
 import { mountCubeViewer } from './viewers/cubeViewer';
 import { mountIfcViewer } from './viewers/ifcViewer';
+import { mountGisViewer } from './viewers/gisViewer';
 import IfcDataPanel from './components/IfcDataPanel';
 import IfcModelsPanel from './components/IfcModelsPanel';
+import GisPanel from './components/GisPanel';
+import { GisLayers } from './bim-components';
 
 BUI.Manager.init();
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [activeViewer, setActiveViewer] = useState<'cube' | 'ifc'>('cube');
+  const [activeViewer, setActiveViewer] = useState<'cube' | 'ifc' | 'gis'>('cube');
   const ifcHandleRef = useRef<ReturnType<typeof mountIfcViewer> | null>(null);
+  const gisHandleRef = useRef<ReturnType<typeof mountGisViewer> | null>(null);
   const [ifcComponents, setIfcComponents] = useState<OBC.Components | null>(null);
+  const [gisLayers, setGisLayers] = useState<GisLayers | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
     container.innerHTML = '';
 
-    if (activeViewer === 'cube') {
-      ifcHandleRef.current?.dispose();
-      ifcHandleRef.current = null;
-      setIfcComponents(null);
-      const cleanup = mountCubeViewer(container);
-      return cleanup;
+    ifcHandleRef.current?.dispose();
+    ifcHandleRef.current = null;
+    gisHandleRef.current?.dispose();
+    gisHandleRef.current = null;
+    setIfcComponents(null);
+    setGisLayers(null);
+
+    if (activeViewer === 'cube') return mountCubeViewer(container);
+
+    if (activeViewer === 'ifc') {
+      const handle = mountIfcViewer(container);
+      ifcHandleRef.current = handle;
+      setIfcComponents(handle.components);
+      return () => handle.dispose();
     }
 
-    const handle = mountIfcViewer(container);
-    ifcHandleRef.current = handle;
-    setIfcComponents(handle.components);
+    const handle = mountGisViewer(container);
+    gisHandleRef.current = handle;
+    setGisLayers(handle.gisLayers);
     return () => handle.dispose();
   }, [activeViewer]);
 
@@ -79,6 +92,20 @@ export default function App() {
           >
             IFC viewer
           </button>
+          <button
+            onClick={() => setActiveViewer('gis')}
+            style={{
+              flex: 1,
+              padding: '8px 10px',
+              borderRadius: 8,
+              border: '1px solid #2a2a2a',
+              background: activeViewer === 'gis' ? '#2a2a2a' : '#171717',
+              color: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            GIS viewer
+          </button>
         </div>
 
         {activeViewer === 'ifc' && ifcComponents && (
@@ -87,6 +114,8 @@ export default function App() {
             <IfcDataPanel components={ifcComponents} />
           </>
         )}
+
+        {activeViewer === 'gis' && gisLayers && <GisPanel gisLayers={gisLayers} />}
       </aside>
 
       <main style={{ flex: 1, minWidth: 0 }}>
